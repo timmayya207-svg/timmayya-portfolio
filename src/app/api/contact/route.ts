@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import nodemailer from "nodemailer";
+
+// Using Web3Forms - Free email service without SMTP setup
+// Get your access key from: https://web3forms.com
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,70 +25,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create transporter
-    // Using Gmail SMTP - you'll need to set up an App Password
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER || "timmayya207@gmail.com",
-        pass: process.env.EMAIL_PASSWORD, // Gmail App Password
-      },
+    // Use Web3Forms to send email (free, no SMTP setup needed)
+    // Access key for timmayya207@gmail.com - get from web3forms.com
+    const accessKey = process.env.WEB3FORMS_ACCESS_KEY || "your-access-key";
+
+    const formData = new FormData();
+    formData.append("access_key", accessKey);
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("message", message);
+    formData.append("subject", `New Contact Form Submission from ${name}`);
+    formData.append("to", "timmayya207@gmail.com");
+    formData.append("from_name", "Timmayya Portfolio");
+    formData.append("replyto", email);
+
+    const response = await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      body: formData,
     });
 
-    // Email content
-    const mailOptions = {
-      from: `"Timmayya Design Portfolio" <${process.env.EMAIL_USER || "timmayya207@gmail.com"}>`,
-      to: "timmayya207@gmail.com",
-      subject: `New Contact Form Submission from ${name}`,
-      replyTo: email,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%); border: 1px solid #d4af37; border-radius: 10px;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #d4af37; margin: 0; font-size: 28px;">New Message from Portfolio</h1>
-            <p style="color: #888; margin-top: 10px;">Someone wants to connect with you!</p>
-          </div>
-          
-          <div style="background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-            <h2 style="color: #d4af37; margin-top: 0; font-size: 18px;">Contact Details</h2>
-            <p style="color: #fff; margin: 10px 0;"><strong style="color: #d4af37;">Name:</strong> ${name}</p>
-            <p style="color: #fff; margin: 10px 0;"><strong style="color: #d4af37;">Email:</strong> <a href="mailto:${email}" style="color: #fff; text-decoration: underline;">${email}</a></p>
-          </div>
-          
-          <div style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; padding: 20px;">
-            <h2 style="color: #d4af37; margin-top: 0; font-size: 18px;">Message</h2>
-            <p style="color: #fff; line-height: 1.6; white-space: pre-wrap;">${message}</p>
-          </div>
-          
-          <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.2);">
-            <p style="color: #666; font-size: 12px;">This message was sent from your portfolio website contact form.</p>
-          </div>
-        </div>
-      `,
-      text: `
-New Contact Form Submission
+    const result = await response.json();
 
-Name: ${name}
-Email: ${email}
-
-Message:
-${message}
-
----
-This message was sent from your portfolio website contact form.
-      `,
-    };
-
-    // Send email
-    await transporter.sendMail(mailOptions);
-
-    return NextResponse.json({
-      success: true,
-      message: "Message sent successfully!",
-    });
+    if (result.success) {
+      return NextResponse.json({
+        success: true,
+        message: "Message sent successfully!",
+      });
+    } else {
+      console.error("Web3Forms error:", result);
+      return NextResponse.json(
+        { success: false, error: "Failed to send message. Please try again." },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error("Error sending email:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to send message. Please try again." },
+      { success: false, error: "Failed to send message. Please try again later." },
       { status: 500 }
     );
   }

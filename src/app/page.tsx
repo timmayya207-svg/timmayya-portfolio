@@ -863,12 +863,18 @@ function ContactSection() {
     setSubmitError(null);
 
     try {
-      const response = await fetch("/api/contact", {
+      // Using Web3Forms - free email service
+      const formDataObj = new FormData();
+      formDataObj.append("access_key", "8bb1f4b3-15c8-40df-9f54-cfb8ed8fa269");
+      formDataObj.append("name", formData.name);
+      formDataObj.append("email", formData.email);
+      formDataObj.append("message", formData.message);
+      formDataObj.append("subject", `New Contact from ${formData.name} - Portfolio`);
+      formDataObj.append("to", "timmayya207@gmail.com");
+
+      const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        body: formDataObj,
       });
 
       const data = await response.json();
@@ -878,7 +884,7 @@ function ContactSection() {
         setFormData({ name: "", email: "", message: "" });
         setTimeout(() => setIsSubmitted(false), 5000);
       } else {
-        setSubmitError(data.error || "Failed to send message. Please try again.");
+        setSubmitError(data.message || "Failed to send message. Please try again.");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
