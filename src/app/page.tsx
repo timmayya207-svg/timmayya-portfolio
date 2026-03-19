@@ -459,12 +459,12 @@ function HeroSection() {
               <div className="absolute inset-0 rounded-full border-2 border-gold-metallic/30 animate-pulse" />
               <div className="absolute inset-4 rounded-full border border-gold-metallic/20" />
               
-              <div className="absolute inset-8 rounded-full overflow-hidden border-2 border-gold-metallic/40 shadow-2xl shadow-gold-metallic/20 bg-black/50">
+              <div className="absolute inset-4 rounded-full overflow-hidden border-2 border-gold-metallic/40 shadow-2xl shadow-gold-metallic/20 bg-black/50">
                 <Image
                   src="/tn-logo.png"
                   alt="Timmayya - TN Gold Logo"
                   fill
-                  className="object-contain p-8"
+                  className="object-contain"
                   priority
                 />
               </div>
@@ -543,7 +543,7 @@ function AboutSection() {
                   src="/tn-logo.png"
                   alt="TN Gold Logo"
                   fill
-                  className="object-contain p-8"
+                  className="object-contain p-2"
                 />
               </div>
             </div>
@@ -716,8 +716,8 @@ function ProjectsSection() {
       },
     },
     {
-      image: "/project-navovara.png",
-      title: "Navovara Bar & Restaurant",
+      image: "/project-sarovara.png",
+      title: "Sarovara Bar and Restaurant",
       category: "Bar & Restaurant",
       location: "Karnataka",
       description: "Comprehensive kitchen setup with specialized equipment placement and utility design.",
