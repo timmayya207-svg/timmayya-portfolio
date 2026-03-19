@@ -26,13 +26,207 @@ import {
   Wrench,
   Award,
   GraduationCap,
-  Languages
+  Languages,
+  ChefHat,
+  Utensils,
+  Image as ImageIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Image from "next/image";
+
+// Project Detail Modal Component
+function ProjectModal({ 
+  project, 
+  isOpen, 
+  onClose 
+}: { 
+  project: {
+    title: string;
+    category: string;
+    location: string;
+    description: string;
+    images: {
+      kitchen: string[];
+      dining: string[];
+      restaurant: string[];
+    };
+  } | null;
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  const [activeTab, setActiveTab] = useState<"kitchen" | "dining" | "restaurant">("kitchen");
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
+  if (!project) return null;
+
+  const tabs = [
+    { id: "kitchen" as const, label: "Kitchen Setup", icon: ChefHat, count: project.images.kitchen.length },
+    { id: "dining" as const, label: "Dining Setup", icon: Utensils, count: project.images.dining.length },
+    { id: "restaurant" as const, label: "Restaurant Setup", icon: Building2, count: project.images.restaurant.length },
+  ];
+
+  const currentImages = project.images[activeTab];
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="relative w-full max-w-5xl max-h-[90vh] bg-gradient-to-b from-gray-900 to-black border border-gold-metallic/30 rounded-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="sticky top-0 z-10 bg-black/95 backdrop-blur-md border-b border-gold-metallic/20 p-4 sm:p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <span className="px-3 py-1 bg-gold-metallic/20 border border-gold-metallic/40 rounded-full text-xs text-gold-metallic">
+                    {project.category}
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-playfair gold-gradient mt-2">
+                    {project.title}
+                  </h2>
+                  <div className="flex items-center gap-1 text-sm text-gray-400 mt-1">
+                    <MapPin size={14} />
+                    {project.location}
+                  </div>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="p-2 bg-gold-metallic/10 border border-gold-metallic/30 rounded-lg hover:bg-gold-metallic/20 transition-colors"
+                >
+                  <X className="w-5 h-5 text-gold-metallic" />
+                </button>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex flex-wrap gap-2 mt-4">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      activeTab === tab.id
+                        ? "bg-gold-metallic text-black"
+                        : "bg-gold-metallic/10 border border-gold-metallic/30 text-gold-metallic hover:bg-gold-metallic/20"
+                    }`}
+                  >
+                    <tab.icon className="w-4 h-4" />
+                    {tab.label}
+                    {tab.count > 0 && (
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                        activeTab === tab.id ? "bg-black/20" : "bg-gold-metallic/20"
+                      }`}>
+                        {tab.count}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 sm:p-6 overflow-y-auto max-h-[60vh]">
+              {currentImages.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {currentImages.map((img, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="relative aspect-square rounded-xl overflow-hidden border border-gold-metallic/20 cursor-pointer group"
+                      onClick={() => setSelectedImage(img)}
+                    >
+                      <Image
+                        src={img}
+                        alt={`${project.title} - ${activeTab} ${index + 1}`}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <ImageIcon className="w-8 h-8 text-gold-metallic" />
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-16 h-16 rounded-full bg-gold-metallic/10 border border-gold-metallic/30 flex items-center justify-center mb-4">
+                    <ImageIcon className="w-8 h-8 text-gold-metallic/50" />
+                  </div>
+                  <p className="text-gray-400">No images available for this category</p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-black/95 backdrop-blur-md border-t border-gold-metallic/20 p-4">
+              <p className="text-sm text-gray-400 text-center">
+                {project.description}
+              </p>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* Full Image View */}
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[110] flex items-center justify-center bg-black/95"
+            onClick={() => setSelectedImage(null)}
+          >
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-4 right-4 p-3 bg-gold-metallic/20 border border-gold-metallic/40 rounded-full hover:bg-gold-metallic/30 transition-colors"
+            >
+              <X className="w-6 h-6 text-gold-metallic" />
+            </button>
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="relative w-full max-w-4xl h-[80vh] mx-4"
+            >
+              <Image
+                src={selectedImage}
+                alt="Full size image"
+                fill
+                className="object-contain"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </AnimatePresence>
+  );
+}
 
 // Navigation Component
 function Navigation() {
@@ -44,7 +238,6 @@ function Navigation() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
       
-      // Update active section based on scroll position
       const sections = ["home", "about", "expertise", "projects", "contact"];
       for (const section of sections.reverse()) {
         const element = document.getElementById(section);
@@ -88,7 +281,6 @@ function Navigation() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo */}
           <a
             href="#home"
             onClick={(e) => {
@@ -110,7 +302,6 @@ function Navigation() {
             </span>
           </a>
 
-          {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
               <a
@@ -137,7 +328,6 @@ function Navigation() {
             </Button>
           </nav>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="lg:hidden p-2 text-gold-metallic hover:text-gold-shine transition-colors"
@@ -147,7 +337,6 @@ function Navigation() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -195,7 +384,6 @@ function HeroSection() {
       id="home"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* Background Pattern */}
       <div className="absolute inset-0 hero-pattern">
         <Image
           src="/bg-pattern.png"
@@ -206,16 +394,12 @@ function HeroSection() {
         />
       </div>
       
-      {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black" />
-
-      {/* Decorative Elements */}
       <div className="absolute top-20 right-0 w-96 h-96 bg-gold-metallic/5 rounded-full blur-3xl" />
       <div className="absolute bottom-20 left-0 w-96 h-96 bg-gold-metallic/5 rounded-full blur-3xl" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Text Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -229,22 +413,22 @@ function HeroSection() {
               Commercial Kitchen Designer
             </p>
             
-            <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-8">
-              <span className="px-4 py-2 bg-gold-metallic/10 border border-gold-metallic/30 rounded-full text-sm text-gold-metallic">
+            <div className="flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3 mb-8">
+              <span className="px-3 sm:px-4 py-2 bg-gold-metallic/10 border border-gold-metallic/30 rounded-full text-xs sm:text-sm text-gold-metallic">
                 Kitchen Layout Design
               </span>
-              <span className="px-4 py-2 bg-gold-metallic/10 border border-gold-metallic/30 rounded-full text-sm text-gold-metallic">
+              <span className="px-3 sm:px-4 py-2 bg-gold-metallic/10 border border-gold-metallic/30 rounded-full text-xs sm:text-sm text-gold-metallic">
                 MEP Coordination
               </span>
-              <span className="px-4 py-2 bg-gold-metallic/10 border border-gold-metallic/30 rounded-full text-sm text-gold-metallic">
+              <span className="px-3 sm:px-4 py-2 bg-gold-metallic/10 border border-gold-metallic/30 rounded-full text-xs sm:text-sm text-gold-metallic">
                 Project Execution
               </span>
-              <span className="px-4 py-2 bg-gold-metallic/10 border border-gold-metallic/30 rounded-full text-sm text-gold-metallic">
+              <span className="px-3 sm:px-4 py-2 bg-gold-metallic/10 border border-gold-metallic/30 rounded-full text-xs sm:text-sm text-gold-metallic">
                 AutoCAD Expert
               </span>
             </div>
 
-            <p className="text-gray-400 text-lg mb-8 max-w-lg mx-auto lg:mx-0">
+            <p className="text-gray-400 text-base sm:text-lg mb-8 max-w-lg mx-auto lg:mx-0">
               Results-driven Commercial Kitchen Designer with expertise in kitchen layout design, MEP coordination, and project execution. Delivering innovative and efficient commercial kitchen solutions.
             </p>
 
@@ -253,7 +437,7 @@ function HeroSection() {
                 onClick={() => {
                   document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="btn-gold px-8 py-6 text-lg font-semibold"
+                className="btn-gold px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-semibold"
               >
                 View My Projects
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -263,26 +447,23 @@ function HeroSection() {
                 onClick={() => {
                   document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="px-8 py-6 text-lg font-semibold border-gold-metallic/30 text-gold-metallic hover:bg-gold-metallic/10"
+                className="px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-semibold border-gold-metallic/30 text-gold-metallic hover:bg-gold-metallic/10"
               >
                 Get In Touch
               </Button>
             </div>
           </motion.div>
 
-          {/* Logo Display */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
             className="relative order-1 lg:order-2 flex justify-center"
           >
-            <div className="relative w-72 h-72 sm:w-80 sm:h-80 lg:w-96 lg:h-96">
-              {/* Decorative Ring */}
+            <div className="relative w-64 h-64 sm:w-72 sm:h-72 lg:w-96 lg:h-96">
               <div className="absolute inset-0 rounded-full border-2 border-gold-metallic/30 animate-pulse" />
               <div className="absolute inset-4 rounded-full border border-gold-metallic/20" />
               
-              {/* Logo Image */}
               <div className="absolute inset-8 rounded-full overflow-hidden border-2 border-gold-metallic/40 shadow-2xl shadow-gold-metallic/20 bg-black/50">
                 <Image
                   src="/tn-logo.png"
@@ -293,23 +474,21 @@ function HeroSection() {
                 />
               </div>
               
-              {/* Floating Badge */}
               <motion.div
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
-                className="absolute -bottom-4 -right-4 bg-black border border-gold-metallic/40 rounded-xl px-4 py-2 shadow-lg"
+                className="absolute -bottom-2 -right-2 sm:-bottom-4 sm:-right-4 bg-black border border-gold-metallic/40 rounded-xl px-3 sm:px-4 py-2 shadow-lg"
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-sm text-gold-metallic font-medium">Available for Work</span>
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-xs sm:text-sm text-gold-metallic font-medium">Available for Work</span>
                 </div>
               </motion.div>
             </div>
           </motion.div>
         </div>
 
-        {/* Scroll Indicator */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -354,7 +533,6 @@ function AboutSection() {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Logo Display */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -376,7 +554,6 @@ function AboutSection() {
             </div>
           </motion.div>
 
-          {/* Text Content */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -393,40 +570,38 @@ function AboutSection() {
               Results-driven professional seeking challenging roles in Project Management to leverage my technical skills in AutoCAD, Revit, and SketchUp along with hands-on site experience to deliver innovative and efficient commercial kitchen solutions.
             </p>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="text-center p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl">
-                <div className="text-3xl lg:text-4xl font-bold gold-gradient">50+</div>
-                <div className="text-sm text-gray-400 mt-1">Projects</div>
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-8">
+              <div className="text-center p-3 sm:p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl">
+                <div className="text-2xl sm:text-3xl lg:text-4xl font-bold gold-gradient">50+</div>
+                <div className="text-xs sm:text-sm text-gray-400 mt-1">Projects</div>
               </div>
-              <div className="text-center p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl">
-                <div className="text-3xl lg:text-4xl font-bold gold-gradient">2+</div>
-                <div className="text-sm text-gray-400 mt-1">Years Exp.</div>
+              <div className="text-center p-3 sm:p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl">
+                <div className="text-2xl sm:text-3xl lg:text-4xl font-bold gold-gradient">2+</div>
+                <div className="text-xs sm:text-sm text-gray-400 mt-1">Years Exp.</div>
               </div>
-              <div className="text-center p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl">
-                <div className="text-3xl lg:text-4xl font-bold gold-gradient">40+</div>
-                <div className="text-sm text-gray-400 mt-1">Clients</div>
+              <div className="text-center p-3 sm:p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl">
+                <div className="text-2xl sm:text-3xl lg:text-4xl font-bold gold-gradient">40+</div>
+                <div className="text-xs sm:text-sm text-gray-400 mt-1">Clients</div>
               </div>
             </div>
 
-            {/* Education & Certifications */}
             <div className="space-y-4">
-              <div className="flex items-start gap-4 p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl">
-                <div className="w-12 h-12 rounded-lg bg-gold-metallic/10 border border-gold-metallic/30 flex items-center justify-center shrink-0">
-                  <GraduationCap className="w-6 h-6 text-gold-metallic" />
+              <div className="flex items-start gap-3 sm:gap-4 p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gold-metallic/10 border border-gold-metallic/30 flex items-center justify-center shrink-0">
+                  <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-gold-metallic" />
                 </div>
                 <div>
-                  <div className="font-semibold text-white">B.E. Civil Engineering</div>
-                  <div className="text-sm text-gray-400">Oxford College of Engineering, Bengaluru | CGPA: 7.2/10</div>
+                  <div className="font-semibold text-white text-sm sm:text-base">B.E. Civil Engineering</div>
+                  <div className="text-xs sm:text-sm text-gray-400">Oxford College of Engineering, Bengaluru | CGPA: 7.2/10</div>
                 </div>
               </div>
-              <div className="flex items-start gap-4 p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl">
-                <div className="w-12 h-12 rounded-lg bg-gold-metallic/10 border border-gold-metallic/30 flex items-center justify-center shrink-0">
-                  <Award className="w-6 h-6 text-gold-metallic" />
+              <div className="flex items-start gap-3 sm:gap-4 p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gold-metallic/10 border border-gold-metallic/30 flex items-center justify-center shrink-0">
+                  <Award className="w-5 h-5 sm:w-6 sm:h-6 text-gold-metallic" />
                 </div>
                 <div>
-                  <div className="font-semibold text-white">AutoCAD 2D & 3D, SketchUp, V-Ray</div>
-                  <div className="text-sm text-gray-400">Certified - Ace Career Solution</div>
+                  <div className="font-semibold text-white text-sm sm:text-base">AutoCAD 2D & 3D, SketchUp, V-Ray</div>
+                  <div className="text-xs sm:text-sm text-gray-400">Certified - Ace Career Solution</div>
                 </div>
               </div>
             </div>
@@ -443,45 +618,25 @@ function ExpertiseSection() {
     {
       icon: Compass,
       title: "Kitchen Layout Design",
-      items: [
-        "Restaurant layouts",
-        "Kitchen equipment planning",
-        "Workflow optimization",
-        "Space planning",
-      ],
+      items: ["Restaurant layouts", "Kitchen equipment planning", "Workflow optimization", "Space planning"],
       color: "from-amber-500/20 to-orange-500/20",
     },
     {
       icon: Zap,
       title: "MEP Coordination",
-      items: [
-        "Electrical design",
-        "Plumbing design",
-        "Drainage systems",
-        "Utility planning",
-      ],
+      items: ["Electrical design", "Plumbing design", "Drainage systems", "Utility planning"],
       color: "from-yellow-500/20 to-amber-500/20",
     },
     {
       icon: Building2,
       title: "Project Management",
-      items: [
-        "Site supervision",
-        "Vendor coordination",
-        "Quality control",
-        "Client handling",
-      ],
+      items: ["Site supervision", "Vendor coordination", "Quality control", "Client handling"],
       color: "from-orange-500/20 to-red-500/20",
     },
     {
       icon: Cuboid,
       title: "3D Design & Rendering",
-      items: [
-        "SketchUp modeling",
-        "Revit Architecture",
-        "V-Ray rendering",
-        "3D visualization",
-      ],
+      items: ["SketchUp modeling", "Revit Architecture", "V-Ray rendering", "3D visualization"],
       color: "from-amber-400/20 to-yellow-500/20",
     },
   ];
@@ -515,7 +670,7 @@ function ExpertiseSection() {
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
           {expertise.map((item, index) => (
             <motion.div
               key={item.title}
@@ -527,17 +682,17 @@ function ExpertiseSection() {
               <Card className="h-full bg-black/50 border-gold-metallic/20 card-hover overflow-hidden group">
                 <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
                 <CardHeader className="relative">
-                  <div className="w-14 h-14 rounded-xl bg-gold-metallic/10 border border-gold-metallic/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <item.icon className="w-7 h-7 text-gold-metallic" />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gold-metallic/10 border border-gold-metallic/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <item.icon className="w-6 h-6 sm:w-7 sm:h-7 text-gold-metallic" />
                   </div>
-                  <CardTitle className="text-lg text-white group-hover:text-gold-metallic transition-colors">
+                  <CardTitle className="text-base sm:text-lg text-white group-hover:text-gold-metallic transition-colors">
                     {item.title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="relative">
                   <ul className="space-y-2">
                     {item.items.map((listItem) => (
-                      <li key={listItem} className="flex items-center gap-2 text-sm text-gray-400">
+                      <li key={listItem} className="flex items-center gap-2 text-xs sm:text-sm text-gray-400">
                         <div className="w-1.5 h-1.5 rounded-full bg-gold-metallic" />
                         {listItem}
                       </li>
@@ -549,7 +704,6 @@ function ExpertiseSection() {
           ))}
         </div>
 
-        {/* Software Skills */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -558,7 +712,7 @@ function ExpertiseSection() {
           className="mt-12"
         >
           <h3 className="text-2xl font-playfair text-center gold-gradient mb-8">Technical Skills</h3>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
             {software.map((item, index) => (
               <motion.div
                 key={item.name}
@@ -566,9 +720,9 @@ function ExpertiseSection() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl p-4 text-center"
+                className="bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl p-3 sm:p-4 text-center"
               >
-                <div className="text-sm font-medium text-white mb-2">{item.name}</div>
+                <div className="text-xs sm:text-sm font-medium text-white mb-2">{item.name}</div>
                 <div className="w-full bg-gray-800 rounded-full h-2">
                   <div 
                     className="bg-gradient-to-r from-gold-dark via-gold-metallic to-gold-shine h-2 rounded-full transition-all duration-1000"
@@ -581,7 +735,6 @@ function ExpertiseSection() {
           </div>
         </motion.div>
 
-        {/* Languages */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -606,119 +759,160 @@ function ExpertiseSection() {
 
 // Projects Section
 function ProjectsSection() {
+  const [selectedProject, setSelectedProject] = useState<typeof projects[0] | null>(null);
+
   const projects = [
     {
       image: "/project-chalukya.png",
       title: "Chalukya Samrat Restaurant",
       category: "Restaurant",
       location: "Karnataka",
-      description: "Complete kitchen design, equipment installation, and MEP coordination",
+      description: "Complete kitchen design, equipment installation, and MEP coordination for a premium vegetarian restaurant.",
+      images: {
+        kitchen: ["/gallery/IMG-20260318-WA0001.jpg", "/gallery/IMG-20260318-WA0004.jpg"],
+        dining: ["/gallery/IMG-20260318-WA0010.jpg"],
+        restaurant: ["/gallery/IMG-20260318-WA0017.jpg", "/gallery/IMG-20260318-WA0024.jpg", "/gallery/IMG-20260318-WA0025.jpg"],
+      },
     },
     {
       image: "/project-shreenidhi.png",
       title: "Shreenidhi Sagara",
       category: "Veg Hotel",
       location: "Chandapoor",
-      description: "Kitchen layout design, electrical and plumbing systems integration",
+      description: "Kitchen layout design, electrical and plumbing systems integration for a traditional vegetarian hotel.",
+      images: {
+        kitchen: ["/gallery/IMG-20260318-WA0001.jpg"],
+        dining: ["/gallery/IMG-20260318-WA0010.jpg", "/gallery/IMG-20260318-WA0017.jpg"],
+        restaurant: ["/gallery/IMG-20260318-WA0024.jpg"],
+      },
     },
     {
       image: "/project-navovara.png",
       title: "Navovara Bar & Restaurant",
       category: "Bar & Restaurant",
       location: "Karnataka",
-      description: "Comprehensive kitchen setup with specialized equipment placement and utility design",
+      description: "Comprehensive kitchen setup with specialized equipment placement and utility design.",
+      images: {
+        kitchen: ["/gallery/IMG-20260318-WA0004.jpg", "/gallery/IMG-20260318-WA0010.jpg"],
+        dining: ["/gallery/IMG-20260318-WA0017.jpg"],
+        restaurant: ["/gallery/IMG-20260318-WA0025.jpg"],
+      },
     },
     {
       image: "/project-kadamba.png",
       title: "Kadamba Restaurant",
       category: "Restaurant",
       location: "Karnataka",
-      description: "Full-service kitchen design and installation project management",
+      description: "Full-service kitchen design and installation project management for a multi-cuisine restaurant.",
+      images: {
+        kitchen: ["/gallery/IMG-20260318-WA0001.jpg", "/gallery/IMG-20260318-WA0024.jpg"],
+        dining: ["/gallery/IMG-20260318-WA0010.jpg", "/gallery/IMG-20260318-WA0017.jpg"],
+        restaurant: ["/gallery/IMG-20260318-WA0025.jpg"],
+      },
     },
   ];
 
   return (
-    <section id="projects" className="py-24 lg:py-32 relative">
-      <div className="section-divider mb-24" />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl lg:text-5xl font-playfair gold-gradient mb-4">
-            Key Projects
-          </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-transparent via-gold-metallic to-transparent mx-auto mb-6" />
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Successfully designed and executed kitchen setups for numerous hotels, bakeries, bars, and cloud kitchens across Karnataka
-          </p>
-        </motion.div>
+    <>
+      <section id="projects" className="py-24 lg:py-32 relative">
+        <div className="section-divider mb-24" />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl lg:text-5xl font-playfair gold-gradient mb-4">
+              Key Projects
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-transparent via-gold-metallic to-transparent mx-auto mb-6" />
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+              Click on any project to view detailed images of kitchen, dining, and restaurant setups
+            </p>
+          </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {projects.map((project, index) => (
-            <motion.div
-              key={project.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <Card className="group overflow-hidden bg-black/50 border-gold-metallic/20 card-hover">
-                <div className="relative h-48 overflow-hidden">
-                  <Image
-                    src={project.image}
-                    alt={project.title}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-                  <div className="absolute bottom-3 left-3">
-                    <span className="px-2 py-1 bg-gold-metallic/20 border border-gold-metallic/40 rounded text-xs text-gold-metallic">
-                      {project.category}
-                    </span>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {projects.map((project, index) => (
+              <motion.div
+                key={project.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Card 
+                  className="group overflow-hidden bg-black/50 border-gold-metallic/20 card-hover cursor-pointer"
+                  onClick={() => setSelectedProject(project)}
+                >
+                  <div className="relative h-40 sm:h-48 overflow-hidden">
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                    <div className="absolute bottom-3 left-3">
+                      <span className="px-2 py-1 bg-gold-metallic/20 border border-gold-metallic/40 rounded text-xs text-gold-metallic">
+                        {project.category}
+                      </span>
+                    </div>
+                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="p-2 bg-gold-metallic rounded-full">
+                        <ImageIcon className="w-4 h-4 text-black" />
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold text-white group-hover:text-gold-metallic transition-colors mb-1">
-                    {project.title}
-                  </h3>
-                  <p className="text-sm text-gray-400 mb-2">
-                    {project.description}
-                  </p>
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
-                    <MapPin size={12} />
-                    {project.location}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Additional Projects Note */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mt-12 text-center"
-        >
-          <div className="flex flex-wrap items-center justify-center gap-2 px-4 py-3 bg-gold-metallic/5 border border-gold-metallic/20 rounded-full mx-auto max-w-md">
-            <UtensilsCrossed className="w-5 h-5 text-gold-metallic" />
-            <span className="text-gray-400">Also worked on:</span>
-            <span className="text-white">Hotels</span>
-            <span className="text-gold-metallic">•</span>
-            <span className="text-white">Bakeries</span>
-            <span className="text-gold-metallic">•</span>
-            <span className="text-white">Cloud Kitchens</span>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold text-white group-hover:text-gold-metallic transition-colors mb-1 text-sm sm:text-base">
+                      {project.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-400 mb-2 line-clamp-2">
+                      {project.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <MapPin size={12} />
+                        {project.location}
+                      </div>
+                      <span className="text-xs text-gold-metallic">Click to view →</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </div>
-        </motion.div>
-      </div>
-    </section>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mt-12 text-center"
+          >
+            <div className="flex flex-wrap items-center justify-center gap-2 px-4 py-3 bg-gold-metallic/5 border border-gold-metallic/20 rounded-full mx-auto max-w-md">
+              <UtensilsCrossed className="w-5 h-5 text-gold-metallic" />
+              <span className="text-gray-400">Also worked on:</span>
+              <span className="text-white">Hotels</span>
+              <span className="text-gold-metallic">•</span>
+              <span className="text-white">Bakeries</span>
+              <span className="text-gold-metallic">•</span>
+              <span className="text-white">Cloud Kitchens</span>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Project Modal */}
+      <ProjectModal
+        project={selectedProject}
+        isOpen={selectedProject !== null}
+        onClose={() => setSelectedProject(null)}
+      />
+    </>
   );
 }
 
@@ -735,15 +929,10 @@ function ContactSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    
     setIsSubmitting(false);
     setIsSubmitted(true);
     setFormData({ name: "", email: "", message: "" });
-    
-    // Reset success message after 5 seconds
     setTimeout(() => setIsSubmitted(false), 5000);
   };
 
@@ -796,7 +985,6 @@ function ContactSection() {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
-          {/* Contact Info */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -810,21 +998,21 @@ function ContactSection() {
               <p className="text-gray-400">Commercial Kitchen Designer</p>
             </div>
 
-            <div className="space-y-4 mb-8">
+            <div className="space-y-3 sm:space-y-4 mb-8">
               {contactInfo.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
                   target={item.label === "Website" ? "_blank" : undefined}
                   rel={item.label === "Website" ? "noopener noreferrer" : undefined}
-                  className="flex items-start gap-4 p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl hover:bg-gold-metallic/10 transition-colors group"
+                  className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl hover:bg-gold-metallic/10 transition-colors group"
                 >
-                  <div className="w-12 h-12 rounded-lg bg-gold-metallic/10 border border-gold-metallic/30 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <item.icon className="w-5 h-5 text-gold-metallic" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gold-metallic/10 border border-gold-metallic/30 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
+                    <item.icon className="w-4 h-4 sm:w-5 sm:h-5 text-gold-metallic" />
                   </div>
-                  <div>
-                    <div className="text-sm text-gray-500">{item.label}</div>
-                    <div className="text-white group-hover:text-gold-metallic transition-colors">
+                  <div className="min-w-0">
+                    <div className="text-xs sm:text-sm text-gray-500">{item.label}</div>
+                    <div className="text-sm sm:text-base text-white group-hover:text-gold-metallic transition-colors break-all">
                       {item.value}
                     </div>
                   </div>
@@ -832,7 +1020,6 @@ function ContactSection() {
               ))}
             </div>
 
-            {/* Logo */}
             <div className="hidden lg:flex justify-center">
               <div className="relative w-48 h-48">
                 <Image
@@ -845,7 +1032,6 @@ function ContactSection() {
             </div>
           </motion.div>
 
-          {/* Contact Form */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -853,7 +1039,7 @@ function ContactSection() {
             transition={{ duration: 0.6 }}
           >
             <Card className="bg-black/50 border-gold-metallic/20">
-              <CardContent className="p-6 lg:p-8">
+              <CardContent className="p-4 sm:p-6 lg:p-8">
                 {isSubmitted ? (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -871,7 +1057,7 @@ function ContactSection() {
                     </p>
                   </motion.div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
                         Name
@@ -917,7 +1103,7 @@ function ContactSection() {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full btn-gold py-6 text-lg font-semibold"
+                      className="w-full btn-gold py-5 sm:py-6 text-base sm:text-lg font-semibold"
                     >
                       {isSubmitting ? (
                         <div className="flex items-center gap-2">
