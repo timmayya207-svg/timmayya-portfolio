@@ -863,28 +863,27 @@ function ContactSection() {
     setSubmitError(null);
 
     try {
-      // Using Web3Forms - free email service
+      // Using Formsubmit.co - completely free, no setup required
+      // First submission will send a confirmation email to activate
       const formDataObj = new FormData();
-      formDataObj.append("access_key", "8bb1f4b3-15c8-40df-9f54-cfb8ed8fa269");
       formDataObj.append("name", formData.name);
       formDataObj.append("email", formData.email);
       formDataObj.append("message", formData.message);
-      formDataObj.append("subject", `New Contact from ${formData.name} - Portfolio`);
-      formDataObj.append("to", "timmayya207@gmail.com");
+      formDataObj.append("_subject", `New Contact from ${formData.name} - Portfolio Website`);
+      formDataObj.append("_captcha", "false");
+      formDataObj.append("_template", "table");
 
-      const response = await fetch("https://api.web3forms.com/submit", {
+      const response = await fetch("https://formsubmit.co/timmayya207@gmail.com", {
         method: "POST",
         body: formDataObj,
       });
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.ok) {
         setIsSubmitted(true);
         setFormData({ name: "", email: "", message: "" });
         setTimeout(() => setIsSubmitted(false), 5000);
       } else {
-        setSubmitError(data.message || "Failed to send message. Please try again.");
+        setSubmitError("Failed to send message. Please try again.");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
