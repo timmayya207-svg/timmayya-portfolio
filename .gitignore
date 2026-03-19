@@ -1,0 +1,67 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Next.js
+.next/
+out/
+
+# Production
+build/
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env*.local
+.env
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+dev.log
+server.log
+
+# Database
+*.db
+*.db-journal
+prisma/migrations/
+
+# Uploads (keep structure but ignore content)
+upload/*
+!upload/.gitkeep
+
+# Download
+download/*
+!download/.gitkeep
+
+# Scripts
+.zscripts/
+mini-services/
+examples/
+
+# Lock files (optional - some prefer to keep)
+# bun.lock
+# package-lock.json
