@@ -16,25 +16,18 @@ import {
   Building2,
   UtensilsCrossed,
   Cuboid,
-  FileText,
-  Palette,
-  Ruler,
-  Lightbulb,
   ArrowRight,
   Zap,
-  Droplets,
-  Wrench,
   Award,
-  GraduationCap,
-  Languages,
   ChefHat,
   Utensils,
-  Image as ImageIcon
+  Image as ImageIcon,
+  XCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 
 // Project Detail Modal Component
@@ -82,115 +75,119 @@ function ProjectModal({
   const currentImages = project.images[activeTab];
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
-          onClick={onClose}
-        >
+    <>
+      <AnimatePresence>
+        {isOpen && (
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="relative w-full max-w-5xl max-h-[90vh] bg-gradient-to-b from-gray-900 to-black border border-gold-metallic/30 rounded-2xl overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-black/95 backdrop-blur-sm"
+            onClick={onClose}
           >
-            {/* Header */}
-            <div className="sticky top-0 z-10 bg-black/95 backdrop-blur-md border-b border-gold-metallic/20 p-4 sm:p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <span className="px-3 py-1 bg-gold-metallic/20 border border-gold-metallic/40 rounded-full text-xs text-gold-metallic">
-                    {project.category}
-                  </span>
-                  <h2 className="text-2xl sm:text-3xl font-playfair gold-gradient mt-2">
-                    {project.title}
-                  </h2>
-                  <div className="flex items-center gap-1 text-sm text-gray-400 mt-1">
-                    <MapPin size={14} />
-                    {project.location}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] bg-gradient-to-b from-gray-900 to-black border border-gold-metallic/30 rounded-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="sticky top-0 z-10 bg-black/95 backdrop-blur-md border-b border-gold-metallic/20 p-3 sm:p-6">
+                <div className="flex items-start justify-between gap-2 sm:gap-4">
+                  <div className="flex-1 min-w-0">
+                    <span className="px-2 sm:px-3 py-1 bg-gold-metallic/20 border border-gold-metallic/40 rounded-full text-xs text-gold-metallic">
+                      {project.category}
+                    </span>
+                    <h2 className="text-xl sm:text-3xl font-playfair gold-gradient mt-2">
+                      {project.title}
+                    </h2>
+                    <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-400 mt-1">
+                      <MapPin size={14} />
+                      {project.location}
+                    </div>
                   </div>
-                </div>
-                <button
-                  onClick={onClose}
-                  className="p-2 bg-gold-metallic/10 border border-gold-metallic/30 rounded-lg hover:bg-gold-metallic/20 transition-colors"
-                >
-                  <X className="w-5 h-5 text-gold-metallic" />
-                </button>
-              </div>
-
-              {/* Tabs */}
-              <div className="flex flex-wrap gap-2 mt-4">
-                {tabs.map((tab) => (
                   <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      activeTab === tab.id
-                        ? "bg-gold-metallic text-black"
-                        : "bg-gold-metallic/10 border border-gold-metallic/30 text-gold-metallic hover:bg-gold-metallic/20"
-                    }`}
+                    onClick={onClose}
+                    className="p-2 bg-gold-metallic/10 border border-gold-metallic/30 rounded-lg hover:bg-gold-metallic/20 transition-colors shrink-0"
                   >
-                    <tab.icon className="w-4 h-4" />
-                    {tab.label}
-                    {tab.count > 0 && (
-                      <span className={`px-2 py-0.5 rounded-full text-xs ${
-                        activeTab === tab.id ? "bg-black/20" : "bg-gold-metallic/20"
-                      }`}>
-                        {tab.count}
-                      </span>
-                    )}
+                    <X className="w-5 h-5 text-gold-metallic" />
                   </button>
-                ))}
-              </div>
-            </div>
+                </div>
 
-            {/* Content */}
-            <div className="p-4 sm:p-6 overflow-y-auto max-h-[60vh]">
-              {currentImages.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {currentImages.map((img, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="relative aspect-square rounded-xl overflow-hidden border border-gold-metallic/20 cursor-pointer group"
-                      onClick={() => setSelectedImage(img)}
+                {/* Tabs */}
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                        activeTab === tab.id
+                          ? "bg-gold-metallic text-black"
+                          : "bg-gold-metallic/10 border border-gold-metallic/30 text-gold-metallic hover:bg-gold-metallic/20"
+                      }`}
                     >
-                      <Image
-                        src={img}
-                        alt={`${project.title} - ${activeTab} ${index + 1}`}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <ImageIcon className="w-8 h-8 text-gold-metallic" />
-                      </div>
-                    </motion.div>
+                      <tab.icon className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden xs:inline">{tab.label}</span>
+                      <span className="xs:hidden">{tab.id === "kitchen" ? "Kitchen" : tab.id === "dining" ? "Dining" : "Restaurant"}</span>
+                      {tab.count > 0 && (
+                        <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-xs ${
+                          activeTab === tab.id ? "bg-black/20" : "bg-gold-metallic/20"
+                        }`}>
+                          {tab.count}
+                        </span>
+                      )}
+                    </button>
                   ))}
                 </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="w-16 h-16 rounded-full bg-gold-metallic/10 border border-gold-metallic/30 flex items-center justify-center mb-4">
-                    <ImageIcon className="w-8 h-8 text-gold-metallic/50" />
-                  </div>
-                  <p className="text-gray-400">No images available for this category</p>
-                </div>
-              )}
-            </div>
+              </div>
 
-            {/* Footer */}
-            <div className="sticky bottom-0 bg-black/95 backdrop-blur-md border-t border-gold-metallic/20 p-4">
-              <p className="text-sm text-gray-400 text-center">
-                {project.description}
-              </p>
-            </div>
+              {/* Content */}
+              <div className="p-3 sm:p-6 overflow-y-auto max-h-[50vh] sm:max-h-[60vh]">
+                {currentImages.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
+                    {currentImages.map((img, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="relative aspect-square rounded-lg sm:rounded-xl overflow-hidden border border-gold-metallic/20 cursor-pointer group"
+                        onClick={() => setSelectedImage(img)}
+                      >
+                        <Image
+                          src={img}
+                          alt={`${project.title} - ${activeTab} ${index + 1}`}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                          unoptimized
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <ImageIcon className="w-6 h-6 sm:w-8 sm:h-8 text-gold-metallic" />
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gold-metallic/10 border border-gold-metallic/30 flex items-center justify-center mb-4">
+                      <ImageIcon className="w-6 h-6 sm:w-8 sm:h-8 text-gold-metallic/50" />
+                    </div>
+                    <p className="text-gray-400 text-sm sm:text-base">No images available for this category</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="sticky bottom-0 bg-black/95 backdrop-blur-md border-t border-gold-metallic/20 p-3 sm:p-4">
+                <p className="text-xs sm:text-sm text-gray-400 text-center">
+                  {project.description}
+                </p>
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* Full Image View */}
       <AnimatePresence>
@@ -199,32 +196,33 @@ function ProjectModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[110] flex items-center justify-center bg-black/95"
+            className="fixed inset-0 z-[110] flex items-center justify-center bg-black/98"
             onClick={() => setSelectedImage(null)}
           >
             <button
               onClick={() => setSelectedImage(null)}
-              className="absolute top-4 right-4 p-3 bg-gold-metallic/20 border border-gold-metallic/40 rounded-full hover:bg-gold-metallic/30 transition-colors"
+              className="absolute top-4 right-4 p-3 bg-gold-metallic/20 border border-gold-metallic/40 rounded-full hover:bg-gold-metallic/30 transition-colors z-[120]"
             >
-              <X className="w-6 h-6 text-gold-metallic" />
+              <XCircle className="w-6 h-6 sm:w-8 sm:h-8 text-gold-metallic" />
             </button>
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
-              className="relative w-full max-w-4xl h-[80vh] mx-4"
+              className="relative w-full max-w-5xl h-[70vh] sm:h-[85vh] mx-2 sm:mx-4"
             >
               <Image
                 src={selectedImage}
                 alt="Full size image"
                 fill
                 className="object-contain"
+                unoptimized
               />
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </AnimatePresence>
+    </>
   );
 }
 
@@ -423,13 +421,10 @@ function HeroSection() {
               <span className="px-3 sm:px-4 py-2 bg-gold-metallic/10 border border-gold-metallic/30 rounded-full text-xs sm:text-sm text-gold-metallic">
                 Project Execution
               </span>
-              <span className="px-3 sm:px-4 py-2 bg-gold-metallic/10 border border-gold-metallic/30 rounded-full text-xs sm:text-sm text-gold-metallic">
-                AutoCAD Expert
-              </span>
             </div>
 
             <p className="text-gray-400 text-base sm:text-lg mb-8 max-w-lg mx-auto lg:mx-0">
-              Results-driven Commercial Kitchen Designer with expertise in kitchen layout design, MEP coordination, and project execution. Delivering innovative and efficient commercial kitchen solutions.
+              Specialized in designing efficient commercial kitchens for restaurants, bars, hotels, and cloud kitchens across Karnataka.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -482,7 +477,7 @@ function HeroSection() {
               >
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-xs sm:text-sm text-gold-metallic font-medium">Available for Work</span>
+                  <span className="text-xs sm:text-sm text-gold-metallic font-medium">Available for Projects</span>
                 </div>
               </motion.div>
             </div>
@@ -564,12 +559,13 @@ function AboutSection() {
               Hello, I'm Timmayya.
             </h3>
             <p className="text-gray-300 text-lg leading-relaxed mb-6">
-              I am a <span className="text-gold-metallic">Commercial Kitchen Designer</span> with expertise in kitchen layout design, MEP coordination, and project execution. Currently working at <span className="text-gold-metallic">Ensign Kitchen Equipment Pvt Ltd</span> as a Kitchen Designer & Site In-charge.
+              I am a <span className="text-gold-metallic">Commercial Kitchen Designer</span> specializing in creating efficient, functional, and innovative kitchen layouts for restaurants, bars, hotels, and cloud kitchens.
             </p>
             <p className="text-gray-400 leading-relaxed mb-8">
-              Results-driven professional seeking challenging roles in Project Management to leverage my technical skills in AutoCAD, Revit, and SketchUp along with hands-on site experience to deliver innovative and efficient commercial kitchen solutions.
+              I provide end-to-end kitchen design solutions including layout planning, equipment placement, MEP coordination (electrical, plumbing, drainage), and complete project execution. Whether you're opening a new restaurant or upgrading your existing kitchen setup, I deliver customized solutions tailored to your specific requirements.
             </p>
 
+            {/* Stats */}
             <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-8">
               <div className="text-center p-3 sm:p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl">
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-bold gold-gradient">50+</div>
@@ -581,28 +577,18 @@ function AboutSection() {
               </div>
               <div className="text-center p-3 sm:p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl">
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-bold gold-gradient">40+</div>
-                <div className="text-xs sm:text-sm text-gray-400 mt-1">Clients</div>
+                <div className="text-xs sm:text-sm text-gray-400 mt-1">Happy Clients</div>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-start gap-3 sm:gap-4 p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gold-metallic/10 border border-gold-metallic/30 flex items-center justify-center shrink-0">
-                  <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-gold-metallic" />
-                </div>
-                <div>
-                  <div className="font-semibold text-white text-sm sm:text-base">B.E. Civil Engineering</div>
-                  <div className="text-xs sm:text-sm text-gray-400">Oxford College of Engineering, Bengaluru | CGPA: 7.2/10</div>
-                </div>
+            {/* Certification */}
+            <div className="flex items-start gap-3 sm:gap-4 p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gold-metallic/10 border border-gold-metallic/30 flex items-center justify-center shrink-0">
+                <Award className="w-5 h-5 sm:w-6 sm:h-6 text-gold-metallic" />
               </div>
-              <div className="flex items-start gap-3 sm:gap-4 p-4 bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gold-metallic/10 border border-gold-metallic/30 flex items-center justify-center shrink-0">
-                  <Award className="w-5 h-5 sm:w-6 sm:h-6 text-gold-metallic" />
-                </div>
-                <div>
-                  <div className="font-semibold text-white text-sm sm:text-base">AutoCAD 2D & 3D, SketchUp, V-Ray</div>
-                  <div className="text-xs sm:text-sm text-gray-400">Certified - Ace Career Solution</div>
-                </div>
+              <div>
+                <div className="font-semibold text-white text-sm sm:text-base">Certified Professional</div>
+                <div className="text-xs sm:text-sm text-gray-400">AutoCAD 2D & 3D, SketchUp, V-Ray</div>
               </div>
             </div>
           </motion.div>
@@ -641,14 +627,6 @@ function ExpertiseSection() {
     },
   ];
 
-  const software = [
-    { name: "AutoCAD 2D & 3D", level: 95 },
-    { name: "Revit Architecture", level: 85 },
-    { name: "SketchUp", level: 90 },
-    { name: "V-Ray Rendering", level: 80 },
-    { name: "MS Office Suite", level: 90 },
-  ];
-
   return (
     <section id="expertise" className="py-24 lg:py-32 relative bg-gradient-to-b from-transparent via-gold-metallic/5 to-transparent">
       <div className="section-divider mb-24" />
@@ -666,11 +644,11 @@ function ExpertiseSection() {
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-transparent via-gold-metallic to-transparent mx-auto mb-6" />
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Specialized skills in commercial kitchen design, MEP coordination, and project execution
+            Specialized services in commercial kitchen design, MEP coordination, and project execution
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {expertise.map((item, index) => (
             <motion.div
               key={item.title}
@@ -703,55 +681,6 @@ function ExpertiseSection() {
             </motion.div>
           ))}
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mt-12"
-        >
-          <h3 className="text-2xl font-playfair text-center gold-gradient mb-8">Technical Skills</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-            {software.map((item, index) => (
-              <motion.div
-                key={item.name}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="bg-gold-metallic/5 border border-gold-metallic/20 rounded-xl p-3 sm:p-4 text-center"
-              >
-                <div className="text-xs sm:text-sm font-medium text-white mb-2">{item.name}</div>
-                <div className="w-full bg-gray-800 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-gold-dark via-gold-metallic to-gold-shine h-2 rounded-full transition-all duration-1000"
-                    style={{ width: `${item.level}%` }}
-                  />
-                </div>
-                <div className="text-xs text-gold-metallic mt-1">{item.level}%</div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mt-12 text-center"
-        >
-          <div className="flex flex-wrap items-center justify-center gap-2 px-4 py-3 bg-gold-metallic/5 border border-gold-metallic/20 rounded-full mx-auto max-w-md">
-            <Languages className="w-5 h-5 text-gold-metallic" />
-            <span className="text-gray-400">Languages:</span>
-            <span className="text-white">Kannada</span>
-            <span className="text-gold-metallic">•</span>
-            <span className="text-white">Telugu</span>
-            <span className="text-gold-metallic">•</span>
-            <span className="text-white">English</span>
-          </div>
-        </motion.div>
       </div>
     </section>
   );
@@ -980,7 +909,7 @@ function ContactSection() {
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-transparent via-gold-metallic to-transparent mx-auto mb-6" />
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Let's discuss your project and bring your vision to life
+            Looking for professional kitchen design services? Let's discuss your project!
           </p>
         </motion.div>
 
